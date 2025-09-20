@@ -16,13 +16,18 @@ const Dashboard: React.FC = () => {
   );
   const [searchTerm, setSearchTerm] = useState("");
 
-  // Fetch posts with current filters
-  const { posts, loading, error, pagination, refetch, loadMore, canLoadMore } =
-    usePosts({
+  // Memoize the options to prevent unnecessary re-renders
+  const postsOptions = useMemo(
+    () => ({
       sort: sortBy,
       search: searchTerm || undefined,
       limit: 10,
-    });
+    }),
+    [sortBy, searchTerm]
+  );
+
+  // Fetch posts with current filters
+  const { posts, error, pagination, refetch } = usePosts(postsOptions);
 
   // Stats calculations
   const stats = useMemo(() => {
@@ -47,6 +52,31 @@ const Dashboard: React.FC = () => {
     e.preventDefault();
     // The search will trigger automatically via the usePosts hook
   };
+
+  // Add debounced search
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
+
+  // Debounce search term
+  React.useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+    }, 500); // 500ms delay
+
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
+  // Update the memoized options to use debounced search
+  const debouncedPostsOptions = useMemo(
+    () => ({
+      sort: sortBy,
+      search: debouncedSearchTerm || undefined,
+      limit: 10,
+    }),
+    [sortBy, debouncedSearchTerm]
+  );
+
+  // Use debounced options
+  const postsQuery = usePosts(debouncedPostsOptions);
 
   if (error && !posts.length) {
     return (
@@ -103,6 +133,11 @@ const Dashboard: React.FC = () => {
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
+              {searchTerm !== debouncedSearchTerm && (
+                <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                </div>
+              )}
             </form>
 
             {/* Sort Options */}
@@ -202,15 +237,15 @@ const Dashboard: React.FC = () => {
               {sortBy === "latest" && "🕒 Latest Posts"}
               {sortBy === "oldest" && "📜 Oldest Posts"}
             </span>
-            {searchTerm && (
+            {debouncedSearchTerm && (
               <span className="text-base font-normal text-gray-600">
-                ({posts.length} results for "{searchTerm}")
+                ({postsQuery.posts.length} results for "{debouncedSearchTerm}")
               </span>
             )}
           </h2>
 
           {/* Loading State */}
-          {loading && posts.length === 0 && (
+          {postsQuery.loading && postsQuery.posts.length === 0 && (
             <div className="text-center py-12">
               <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mx-auto"></div>
               <p className="mt-4 text-gray-600">Loading posts...</p>
@@ -218,14 +253,14 @@ const Dashboard: React.FC = () => {
           )}
 
           {/* No Posts State */}
-          {!loading && posts.length === 0 && (
+          {!postsQuery.loading && postsQuery.posts.length === 0 && (
             <div className="text-center py-12">
               <p className="text-gray-500 text-lg">
-                {searchTerm
+                {debouncedSearchTerm
                   ? "No posts found matching your search."
                   : "No posts available yet."}
               </p>
-              {!searchTerm && (
+              {!debouncedSearchTerm && (
                 <button
                   onClick={() => (window.location.href = "/write")}
                   className="mt-4 bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
@@ -237,23 +272,23 @@ const Dashboard: React.FC = () => {
           )}
 
           {/* Posts Grid */}
-          {posts.length > 0 && (
+          {postsQuery.posts.length > 0 && (
             <>
               <div className="grid gap-6">
-                {posts.map((post) => (
+                {postsQuery.posts.map((post) => (
                   <PostCard key={post._id} post={post} />
                 ))}
               </div>
 
               {/* Load More Button */}
-              {canLoadMore && (
+              {postsQuery.canLoadMore && (
                 <div className="text-center pt-8">
                   <button
-                    onClick={loadMore}
-                    disabled={loading}
+                    onClick={postsQuery.loadMore}
+                    disabled={postsQuery.loading}
                     className="bg-blue-600 text-white px-8 py-3 rounded-lg hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed transition-colors font-medium flex items-center justify-center mx-auto"
                   >
-                    {loading ? (
+                    {postsQuery.loading ? (
                       <>
                         <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
                         Loading...
@@ -266,9 +301,10 @@ const Dashboard: React.FC = () => {
               )}
 
               {/* Pagination Info */}
-              {pagination && (
+              {postsQuery.pagination && (
                 <div className="text-center text-sm text-gray-600 pt-4">
-                  Showing {posts.length} of {pagination.totalPosts} posts
+                  Showing {postsQuery.posts.length} of{" "}
+                  {postsQuery.pagination.totalPosts} posts
                 </div>
               )}
             </>

@@ -36,7 +36,7 @@ const Navbar: React.FC = () => {
             <div className="bg-blue-600 p-2 rounded-lg">
               <CodeBracketIcon className="h-6 w-6 text-white" />
             </div>
-            <span className="text-xl font-bold text-gray-900">TechBlog</span>
+            <span className="text-xl font-bold text-gray-900">DevBlog</span>
           </Link>
 
           {/* Desktop Navigation */}

@@ -1,12 +1,16 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import "./App.css";
 import { Toaster } from "react-hot-toast";
 import { AuthProvider } from "./contexts/AuthContext";
+import "./App.css";
+
+// Pages
 import Home from "./pages/Home";
 import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
 import Dashboard from "./pages/Dashboard";
 import Write from "./pages/Write";
+import PostDetail from "./pages/PostDetail";
+import EditPost from "./pages/EditPost";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
@@ -35,7 +39,16 @@ function App() {
                 </ProtectedRoute>
               }
             />
-            {/* Redirect /posts to dashboard for now */}
+            <Route path="/posts/:slug" element={<PostDetail />} />
+            {/* Add edit route */}
+            <Route
+              path="/posts/:slug/edit"
+              element={
+                <ProtectedRoute>
+                  <EditPost />
+                </ProtectedRoute>
+              }
+            />
             <Route
               path="/posts"
               element={<Navigate to="/dashboard" replace />}
