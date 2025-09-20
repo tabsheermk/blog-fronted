@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import {
   HandThumbUpIcon,
@@ -8,13 +8,25 @@ import {
   ClockIcon,
   CalendarIcon,
 } from "@heroicons/react/24/outline";
-import type { Post } from "../../types/index.ts";
+import {
+  HandThumbUpIcon as HandThumbUpSolidIcon,
+  HandThumbDownIcon as HandThumbDownSolidIcon,
+} from "@heroicons/react/24/solid";
+import type { Post } from "../../types";
+import { postService } from "../../services/postsService";
+import { useAuth } from "../../contexts/AuthContext";
+import { showError } from "../../utils/toast";
 
 interface PostCardProps {
   post: Post;
 }
 
-const PostCard: React.FC<PostCardProps> = ({ post }) => {
+const PostCard: React.FC<PostCardProps> = ({ post: initialPost }) => {
+  const { isAuthenticated } = useAuth();
+  const [post, setPost] = useState(initialPost);
+  const [userVote, setUserVote] = useState<"upvote" | "downvote" | null>(null);
+  const [isVoting, setIsVoting] = useState(false);
+
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString("en-US", {
@@ -27,6 +39,39 @@ const PostCard: React.FC<PostCardProps> = ({ post }) => {
   const truncateContent = (content: string, maxLength: number = 150) => {
     if (content.length <= maxLength) return content;
     return content.substr(0, maxLength) + "...";
+  };
+
+  const handleVote = async (voteType: "upvote" | "downvote") => {
+    if (!isAuthenticated) {
+      showError("Please login to vote on posts");
+      return;
+    }
+
+    if (isVoting) return;
+
+    setIsVoting(true);
+    try {
+      const response = await postService.votePost(post._id, voteType);
+
+      if (response.success) {
+        setPost((prev) => ({
+          ...prev,
+          votes: response.data.votes as typeof prev.votes,
+        }));
+        const validVote =
+          response.data.userVote === "upvote" ||
+          response.data.userVote === "downvote"
+            ? response.data.userVote
+            : null;
+        setUserVote(validVote);
+      }
+    } catch (error: unknown) {
+      const err = error as { response?: { data?: { message?: string } } };
+      const errorMessage = err.response?.data?.message || "Failed to vote";
+      showError(errorMessage);
+    } finally {
+      setIsVoting(false);
+    }
   };
 
   return (
@@ -87,15 +132,44 @@ const PostCard: React.FC<PostCardProps> = ({ post }) => {
         <div className="flex items-center justify-between pt-4 border-t border-gray-100">
           <div className="flex items-center space-x-6">
             {/* Votes */}
-            <div className="flex items-center space-x-1">
-              <HandThumbUpIcon className="h-4 w-4 text-green-600" />
-              <span className="text-sm font-medium text-gray-600">
-                {post.votes.upvotes}
-              </span>
-              <HandThumbDownIcon className="h-4 w-4 text-red-500 ml-1" />
-              <span className="text-sm font-medium text-gray-600">
-                {post.votes.downvotes}
-              </span>
+            <div className="flex items-center space-x-2">
+              <button
+                onClick={() => handleVote("upvote")}
+                disabled={isVoting || !isAuthenticated}
+                className={`flex items-center space-x-1 px-2 py-1 rounded transition-colors ${
+                  userVote === "upvote"
+                    ? "bg-green-100 text-green-700"
+                    : "hover:bg-green-50 text-gray-600"
+                } disabled:opacity-50 disabled:cursor-not-allowed`}
+              >
+                {userVote === "upvote" ? (
+                  <HandThumbUpSolidIcon className="h-4 w-4" />
+                ) : (
+                  <HandThumbUpIcon className="h-4 w-4" />
+                )}
+                <span className="text-sm font-medium">
+                  {post.votes.upvotes}
+                </span>
+              </button>
+
+              <button
+                onClick={() => handleVote("downvote")}
+                disabled={isVoting || !isAuthenticated}
+                className={`flex items-center space-x-1 px-2 py-1 rounded transition-colors ${
+                  userVote === "downvote"
+                    ? "bg-red-100 text-red-700"
+                    : "hover:bg-red-50 text-gray-600"
+                } disabled:opacity-50 disabled:cursor-not-allowed`}
+              >
+                {userVote === "downvote" ? (
+                  <HandThumbDownSolidIcon className="h-4 w-4" />
+                ) : (
+                  <HandThumbDownIcon className="h-4 w-4" />
+                )}
+                <span className="text-sm font-medium">
+                  {post.votes.downvotes}
+                </span>
+              </button>
             </div>
 
             {/* Comments */}
