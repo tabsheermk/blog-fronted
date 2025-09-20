@@ -4,7 +4,7 @@ import Navbar from "../components/layout/Navbar";
 import CommentSection from "../components/comments/CommentSection";
 import ShareModal from "../components/ui/ShareModal";
 import DeleteConfirmModal from "../components/ui/DeleteConfirmModal";
-import { postService } from "../services/postsService";
+import { postService } from "../services/postsService"; // Fixed import path
 import { useAuth } from "../contexts/AuthContext";
 import type { Post } from "../types";
 import { showError, showSuccess } from "../utils/toast";
@@ -161,7 +161,7 @@ const PostDetail: React.FC = () => {
 
   const formatContent = (content: string) => {
     return content.split("\n").map((line, index) => (
-      <p key={index} className="mb-4 last:mb-0">
+      <p key={index} className="mb-4 last:mb-0 text-left">
         {line}
       </p>
     ));
@@ -307,7 +307,7 @@ const PostDetail: React.FC = () => {
               </div>
             </div>
 
-            <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4 leading-tight">
+            <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4 leading-tight text-left">
               {post.title}
             </h1>
 
@@ -376,9 +376,9 @@ const PostDetail: React.FC = () => {
             </div>
           </div>
 
-          {/* Post Body */}
+          {/* Post Body - Updated styling to not center content */}
           <div className="p-8">
-            <div className="prose prose-lg max-w-none text-gray-800 leading-relaxed">
+            <div className="text-gray-800 text-base leading-relaxed space-y-4">
               {formatContent(post.content)}
             </div>
           </div>
