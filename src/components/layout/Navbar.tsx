@@ -1,5 +1,6 @@
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../../contexts/AuthContext";
 import {
   CodeBracketIcon,
   PlusIcon,
@@ -7,23 +8,24 @@ import {
   Bars3Icon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
+import { showSuccess } from "../../utils/toast";
 
-interface NavbarProps {
-  userName?: string;
-  onLogout?: () => void;
-}
-
-const Navbar: React.FC<NavbarProps> = ({ userName = "John Doe", onLogout }) => {
+const Navbar: React.FC = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
   const navigate = useNavigate();
+  const { user, logout } = useAuth();
 
-  const handleLogout = () => {
-    if (onLogout) {
-      onLogout();
+  const handleLogout = async () => {
+    try {
+      await logout();
+      showSuccess("Successfully logged out!");
+      navigate("/login");
+    } catch (error) {
+      console.error("Logout failed:", error);
     }
-    // For now, just navigate to login
-    navigate("/login");
   };
+
+  const userName = user ? `${user.firstName} ${user.lastName}` : "User";
 
   return (
     <nav className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
@@ -50,7 +52,7 @@ const Navbar: React.FC<NavbarProps> = ({ userName = "John Doe", onLogout }) => {
             {/* User Menu */}
             <div className="flex items-center space-x-4">
               <span className="text-gray-700 font-medium">
-                Hello, {userName.split(" ")[0]}
+                Hello, {user?.firstName || "User"}
               </span>
               <button
                 onClick={handleLogout}
