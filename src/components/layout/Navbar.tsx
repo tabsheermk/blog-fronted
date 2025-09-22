@@ -50,8 +50,8 @@ const Navbar: React.FC = () => {
             </Link>
 
             {/* User Menu */}
-            <div className="flex items-center space-x-4">
-              <span className="text-gray-700 font-medium">
+            <div className="flex items-center space-x-4 whitespace-nowrap">
+              <span className="text-gray-700 font-medium truncate max-w-[150px] md:max-w-[200px]">
                 Hello, {user?.firstName || "User"}
               </span>
               <button
@@ -69,6 +69,7 @@ const Navbar: React.FC = () => {
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               className="text-gray-600 hover:text-blue-600 p-2"
+              aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
             >
               {isMobileMenuOpen ? (
                 <XMarkIcon className="h-6 w-6" />
@@ -82,18 +83,18 @@ const Navbar: React.FC = () => {
         {/* Mobile Navigation */}
         {isMobileMenuOpen && (
           <div className="md:hidden py-4 border-t border-gray-200">
-            <div className="space-y-3">
+            <div className="space-y-3 px-2">
               <Link
                 to="/write"
-                className="flex items-center space-x-2 text-blue-600 font-medium"
+                className="flex items-center space-x-2 text-blue-600 py-2 px-3 rounded-md hover:bg-blue-50 transition"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
-                <PlusIcon className="h-4 w-4" />
-                <span>Write Post</span>
+                <PlusIcon className="h-5 w-5" />
+                <span>Write</span>
               </Link>
 
-              <div className="pt-3 border-t border-gray-200">
-                <p className="text-gray-700 font-medium mb-2">
+              <div className="border-t border-gray-200 pt-3 px-3">
+                <p className="text-gray-700 font-medium mb-2 truncate max-w-full">
                   Hello, {userName}
                 </p>
                 <button
@@ -101,9 +102,9 @@ const Navbar: React.FC = () => {
                     setIsMobileMenuOpen(false);
                     handleLogout();
                   }}
-                  className="flex items-center space-x-2 text-red-600 font-medium"
+                  className="flex items-center space-x-2 text-red-600 font-medium w-full px-3 py-2 rounded-md hover:bg-red-50 transition"
                 >
-                  <ArrowRightOnRectangleIcon className="h-4 w-4" />
+                  <ArrowRightOnRectangleIcon className="h-5 w-5" />
                   <span>Logout</span>
                 </button>
               </div>

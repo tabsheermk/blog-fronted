@@ -24,19 +24,15 @@ const ShareModal: React.FC<ShareModalProps> = ({
 
   if (!isOpen) return null;
 
-  const postUrl = `${window.location.origin}/posts/${postSlug}`;
+  const postUrl = `${window.origin}/posts/${postSlug}`;
 
   const copyToClipboard = async () => {
     try {
       await navigator.clipboard.writeText(postUrl);
       setCopied(true);
       showSuccess("Link copied to clipboard!");
-
-      setTimeout(() => {
-        setCopied(false);
-      }, 2000);
-    } catch (error) {
-      console.error("Copy to clipboard failed:", error);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
       showError("Failed to copy link");
     }
   };
@@ -61,7 +57,7 @@ const ShareModal: React.FC<ShareModalProps> = ({
     {
       name: "Facebook",
       icon: "📘",
-      url: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(
+      url: `https://facebook.com/sharer/sharer.php?u=${encodeURIComponent(
         postUrl
       )}`,
       color: "bg-blue-500 hover:bg-blue-600",
@@ -76,13 +72,12 @@ const ShareModal: React.FC<ShareModalProps> = ({
     },
   ];
 
-  const openShare = (url: string) => {
+  const openShare = (url: string) =>
     window.open(url, "_blank", "width=600,height=400");
-  };
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
+      <div className="bg-white rounded-lg max-w-md w-full mx-auto">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
           <div className="flex items-center space-x-2">
@@ -91,7 +86,8 @@ const ShareModal: React.FC<ShareModalProps> = ({
           </div>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 transition-colors"
+            className="text-gray-400 hover:text-gray-600 transition-colors p-2 rounded"
+            aria-label="Close modal"
           >
             <XMarkIcon className="h-6 w-6" />
           </button>
@@ -110,16 +106,16 @@ const ShareModal: React.FC<ShareModalProps> = ({
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Copy Link
             </label>
-            <div className="flex items-center space-x-2">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2">
               <input
                 type="text"
-                value={postUrl}
                 readOnly
-                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                value={postUrl}
+                className="flex-1 w-full sm:w-auto px-3 py-2 mb-2 sm:mb-0 border border-gray-300 rounded-md bg-gray-50 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
               <button
                 onClick={copyToClipboard}
-                className={`px-4 py-2 rounded-lg font-medium transition-colors flex items-center space-x-2 ${
+                className={`flex items-center justify-center px-4 py-2 rounded-md font-medium transition-colors ${
                   copied
                     ? "bg-green-100 text-green-700"
                     : "bg-blue-600 text-white hover:bg-blue-700"
@@ -127,12 +123,12 @@ const ShareModal: React.FC<ShareModalProps> = ({
               >
                 {copied ? (
                   <>
-                    <CheckIcon className="h-4 w-4" />
+                    <CheckIcon className="h-4 w-4 mr-1" />
                     <span>Copied!</span>
                   </>
                 ) : (
                   <>
-                    <LinkIcon className="h-4 w-4" />
+                    <LinkIcon className="h-4 w-4 mr-1" />
                     <span>Copy</span>
                   </>
                 )}
@@ -146,14 +142,15 @@ const ShareModal: React.FC<ShareModalProps> = ({
               Share on Social Media
             </label>
             <div className="grid grid-cols-2 gap-3">
-              {shareOptions.map((option) => (
+              {shareOptions.map(({ name, icon, url, color }) => (
                 <button
-                  key={option.name}
-                  onClick={() => openShare(option.url)}
-                  className={`${option.color} text-white px-4 py-3 rounded-lg font-medium transition-colors flex items-center justify-center space-x-2`}
+                  key={name}
+                  onClick={() => openShare(url)}
+                  className={`${color} text-white px-4 py-3 rounded-md font-medium flex items-center justify-center gap-2 text-base`}
+                  type="button"
                 >
-                  <span className="text-lg">{option.icon}</span>
-                  <span>{option.name}</span>
+                  <span>{icon}</span>
+                  <span>{name}</span>
                 </button>
               ))}
             </div>
@@ -164,7 +161,7 @@ const ShareModal: React.FC<ShareModalProps> = ({
         <div className="px-6 py-4 border-t border-gray-200 text-right">
           <button
             onClick={onClose}
-            className="px-4 py-2 text-gray-600 hover:text-gray-800 font-medium transition-colors"
+            className="px-4 py-2 text-gray-600 hover:text-gray-800 font-medium transition-colors rounded"
           >
             Close
           </button>
