@@ -345,8 +345,7 @@ const PostDetail: React.FC = () => {
             </button>
           </div>
 
-          {/* Post Content */}
-          <div className="px-8 pb-12 text-gray-800 text-base leading-relaxed space-y-6 md:max-w-4xl mx-auto">
+          <div className="px-8 pb-12 text-gray-800 text-base leading-relaxed space-y-6 md:max-w-4xl mx-auto text-left">
             <ReactMarkdown>{post.content}</ReactMarkdown>
           </div>
         </article>
