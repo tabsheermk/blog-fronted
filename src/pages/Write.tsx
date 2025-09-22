@@ -72,7 +72,7 @@ const Write: React.FC = () => {
         navigate(`/posts/${response.data.post.slug}`);
       }
     } catch (error) {
-      const err = error as { response?: { data?: { message?: string } } };
+      const err = error as { response?: { data?: { message: string } } };
       const errorMessage =
         err.response?.data?.message || "Failed to create post";
       showError(errorMessage);
@@ -94,29 +94,30 @@ const Write: React.FC = () => {
       <Navbar />
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         <section className="bg-white rounded-lg border border-gray-200 shadow p-6">
-          <header className="mb-6">
-            <h1 className="text-3xl font-bold text-gray-900 mb-1">
+          <header className="mb-6 text-center sm:text-left">
+            <h1 className="text-3xl sm:text-4xl font-bold mb-1">
               Write a New Post
             </h1>
-            <p className="text-lg text-gray-600">
+            <p className="text-lg sm:text-xl text-gray-600">
               Share your knowledge with the community
             </p>
           </header>
-
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium mb-1" htmlFor="title">
                 Title *
               </label>
               <input
-                type="text"
+                id="title"
                 name="title"
+                type="text"
                 value={formData.title}
                 onChange={handleInputChange}
                 disabled={isLoading}
                 maxLength={200}
                 placeholder="Enter a catchy title"
                 className="w-full rounded border border-gray-300 px-4 py-3 text-lg font-medium focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
+                autoComplete="off"
               />
               <div className="mt-1 flex justify-between text-xs text-gray-500">
                 <span>Make it catchy and descriptive</span>
@@ -125,31 +126,35 @@ const Write: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium mb-1" htmlFor="tags">
                 Tags
               </label>
               <input
-                type="text"
+                id="tags"
                 name="tags"
+                type="text"
                 value={formData.tags}
                 onChange={handleInputChange}
                 disabled={isLoading}
-                placeholder="react, javascript, web development"
+                placeholder="react, javascript, web-development (comma separated)"
                 className="w-full rounded border border-gray-300 px-4 py-3 text-base focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
+                autoComplete="off"
               />
-              <div className="mt-1 text-sm text-gray-500">
-                Add up to 10 tags, comma separated
-              </div>
+              <p className="mt-1 text-xs text-gray-500">Add up to 10 tags</p>
             </div>
 
             <div>
-              <label className="flex justify-between items-center mb-1 text-sm font-medium text-gray-700">
+              <label
+                htmlFor="content"
+                className="flex justify-between items-center mb-2 text-sm font-medium"
+              >
                 <span>Content *</span>
                 <span className="text-xs text-gray-500">
                   {wordCount} words • {readTime} min read
                 </span>
               </label>
               <MdEditor
+                id="content"
                 value={formData.content}
                 style={{ height: "400px" }}
                 renderHTML={(text) => <ReactMarkdown>{text}</ReactMarkdown>}
@@ -157,7 +162,7 @@ const Write: React.FC = () => {
                   setFormData((prev) => ({ ...prev, content: text }))
                 }
                 readOnly={isLoading}
-                placeholder="Write post content using markdown"
+                config={{ view: { menu: true, md: true, html: false } }}
               />
               <div className="mt-1 flex justify-between text-xs text-gray-500">
                 <span>Minimum 50 characters required</span>
@@ -170,7 +175,7 @@ const Write: React.FC = () => {
                 type="button"
                 onClick={handleCancel}
                 disabled={isLoading}
-                className="rounded border border-gray-300 px-6 py-3 text-gray-700 hover:bg-gray-50 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                className="rounded border border-gray-300 px-6 py-3 text-center text-base w-full sm:w-auto text-gray-700 hover:bg-gray-100 disabled:bg-gray-100 disabled:cursor-not-allowed transition-colors"
               >
                 Cancel
               </button>
@@ -181,11 +186,11 @@ const Write: React.FC = () => {
                   !formData.title.trim() ||
                   !formData.content.trim()
                 }
-                className="flex items-center justify-center gap-2 rounded bg-blue-600 px-8 py-3 text-white hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed"
+                className="rounded bg-blue-600 px-6 py-3 w-full sm:w-auto text-center text-base text-white hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
               >
                 {isLoading ? (
                   <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                    <div className="animate-spin rounded-full h-5 w-5 border-4 border-t-transparent border-white"></div>
                     Publishing...
                   </>
                 ) : (
@@ -197,9 +202,9 @@ const Write: React.FC = () => {
               </button>
             </div>
 
-            <aside className="mt-6 bg-blue-50 border border-blue-200 rounded p-4 text-blue-900">
+            <aside className="mt-8 bg-blue-50 border border-blue-200 rounded p-4 text-blue-900 text-sm">
               <h2 className="font-semibold mb-2">✨ Writing Tips</h2>
-              <ul className="list-disc list-inside text-xs space-y-1">
+              <ul className="list-disc list-inside space-y-1">
                 <li>Start with a compelling introduction</li>
                 <li>Use headings, code, and lists for clarity</li>
                 <li>Show code examples and practical insights</li>

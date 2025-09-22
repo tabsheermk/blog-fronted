@@ -183,68 +183,68 @@ const PostDetail: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50 px-4 py-8">
       <Navbar />
-      <main className="max-w-4xl mx-auto">
-        {/* Back Navigation */}
+      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        {/* Back Button */}
         <div className="mb-6 flex justify-start">
           <button
             onClick={() => navigate(-1)}
-            className="inline-flex items-center space-x-2 rounded-md border border-gray-300 px-3 py-2 text-gray-700 hover:bg-gray-100 transition"
+            className="inline-flex items-center space-x-2 rounded-md border border-gray-300 px-3 py-2 text-base sm:text-sm text-gray-700 hover:bg-gray-100 transition"
           >
             <ArrowLeftIcon className="h-5 w-5" />
             <span>Back</span>
           </button>
         </div>
 
-        {/* Post Content */}
+        {/* Article */}
         <article className="bg-white rounded-lg border border-gray-200 shadow-sm">
           {/* Header */}
-          <div className="p-8 border-b border-gray-200 flex flex-col sm:flex-row sm:justify-between sm:items-start gap-6">
+          <div className="p-6 sm:p-8 border-b border-gray-200 flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
             <div className="flex items-center space-x-4">
-              <div className="w-12 h-12 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold text-lg select-none">
+              <div className="w-12 h-12 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold text-lg select-none text-center">
                 {post.authorDetails.firstName[0]}
                 {post.authorDetails.lastName[0]}
               </div>
               <div>
-                <div className="flex items-center space-x-2">
-                  <UserIcon className="h-4 w-4 text-gray-500" />
-                  <p className="font-medium text-gray-900">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-3">
+                  <div className="flex items-center text-gray-900 font-medium">
+                    <UserIcon className="h-4 w-4 mr-1" />
                     {post.authorDetails.firstName} {post.authorDetails.lastName}
-                  </p>
-                </div>
-                <div className="flex flex-wrap items-center space-x-4 text-sm text-gray-500 mt-1">
-                  <div className="flex items-center space-x-1 whitespace-nowrap">
-                    <CalendarIcon className="h-3 w-3" />
-                    <span>{formatDate(post.createdAt)}</span>
                   </div>
-                  <div className="flex items-center space-x-1 whitespace-nowrap">
-                    <ClockIcon className="h-3 w-3" />
-                    <span>{post.readTime} min read</span>
-                  </div>
-                  <div className="flex items-center space-x-1 whitespace-nowrap">
-                    <EyeIcon className="h-3 w-3" />
-                    <span>{post.views} views</span>
+                  <div className="flex space-x-4 text-gray-500 text-xs mt-1 sm:mt-0">
+                    <div className="flex items-center whitespace-nowrap">
+                      <CalendarIcon className="h-3 w-3 mr-1" />
+                      {formatDate(post.createdAt)}
+                    </div>
+                    <div className="flex items-center whitespace-nowrap">
+                      <ClockIcon className="h-3 w-3 mr-1" />
+                      {post.readTime} min read
+                    </div>
+                    <div className="flex items-center whitespace-nowrap">
+                      <EyeIcon className="h-3 w-3 mr-1" />
+                      {post.views} views
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Actions Menu */}
+            {/* Actions menu */}
             <div className="relative">
               <button
                 onClick={(e) => {
                   e.stopPropagation();
                   setShowActionsMenu(!showActionsMenu);
                 }}
-                className="p-2 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition"
                 aria-label="Toggle actions menu"
+                className="p-2 rounded-md text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition"
               >
                 <EllipsisVerticalIcon className="h-5 w-5" />
               </button>
               {showActionsMenu && (
-                <div className="absolute right-0 top-full mt-2 w-48 rounded-lg border border-gray-200 bg-white shadow-lg py-2 z-10">
+                <div className="absolute right-0 mt-2 w-48 rounded-md border border-gray-200 bg-white shadow-lg z-10">
                   <button
                     onClick={handleShare}
-                    className="flex items-center px-4 py-2 text-left text-gray-700 hover:bg-gray-50 space-x-2 w-full"
+                    className="flex w-full items-center space-x-2 px-4 py-2 text-gray-700 hover:bg-gray-50"
                   >
                     <ShareIcon className="h-4 w-4" />
                     <span>Share Post</span>
@@ -253,18 +253,18 @@ const PostDetail: React.FC = () => {
                     <>
                       <button
                         onClick={handleEdit}
-                        className="flex items-center px-4 py-2 text-left text-gray-700 hover:bg-gray-50 space-x-2 w-full"
+                        className="flex w-full items-center space-x-2 px-4 py-2 text-gray-700 hover:bg-gray-50"
                       >
                         <PencilIcon className="h-4 w-4" />
                         <span>Edit Post</span>
                       </button>
-                      <div className="border-t border-gray-200 my-1"></div>
+                      <div className="border-t border-gray-200 my-1" />
                       <button
                         onClick={() => {
                           setShowDeleteModal(true);
                           setShowActionsMenu(false);
                         }}
-                        className="flex items-center px-4 py-2 text-left text-red-600 hover:bg-red-50 space-x-2 w-full"
+                        className="flex w-full items-center space-x-2 px-4 py-2 text-red-600 hover:bg-red-50"
                       >
                         <TrashIcon className="h-4 w-4" />
                         <span>Delete Post</span>
@@ -277,92 +277,90 @@ const PostDetail: React.FC = () => {
           </div>
 
           {/* Title */}
-          <h1 className="px-8 pb-6 text-3xl font-bold text-gray-900 md:text-4xl leading-tight text-left">
+          <h1 className="px-6 sm:px-8 pb-6 text-2xl sm:text-4xl font-extrabold leading-tight tracking-tight text-left">
             {post.title}
           </h1>
 
           {/* Tags */}
-          <div className="flex flex-wrap gap-2 px-8 pb-6 mb-6">
+          <div className="flex flex-wrap px-6 sm:px-8 pb-6 space-x-2 space-y-2 sm:space-y-0">
             {post.tags.map((tag) => (
               <span
                 key={tag}
-                className="rounded-full bg-blue-100 px-3 py-1 text-sm font-medium text-blue-700"
+                className="rounded-full bg-blue-100 px-3 py-1 text-sm font-medium text-blue-700 inline-block"
               >
                 #{tag}
               </span>
             ))}
           </div>
 
-          {/* Voting Section */}
-          <div className="flex items-center space-x-6 px-8 pb-6 border-t border-gray-200">
-            <div className="flex items-center space-x-2">
-              <button
-                onClick={() => handleVote("upvote")}
-                disabled={isVoting || !isAuthenticated}
-                className={`flex items-center space-x-2 rounded-lg px-4 py-2 text-sm transition-colors ${
-                  userVote === "upvote"
-                    ? "bg-green-100 text-green-700"
-                    : "text-gray-600 border border-gray-300 hover:bg-green-50"
-                } disabled:opacity-50 disabled:cursor-not-allowed`}
-              >
-                {userVote === "upvote" ? (
-                  <HandThumbUpSolidIcon className="h-5 w-5" />
-                ) : (
-                  <HandThumbUpIcon className="h-5 w-5" />
-                )}
-                <span className="font-medium">{post.votes.upvotes}</span>
-              </button>
+          {/* Voting and score */}
+          <div className="flex flex-wrap items-center space-x-4 px-6 sm:px-8 pb-6 border-t border-gray-200">
+            <button
+              onClick={() => handleVote("upvote")}
+              disabled={!!isAuthor || !isAuthenticated}
+              className={`flex items-center rounded-lg border border-gray-300 px-4 py-2 text-sm transition ${
+                userVote === "upvote"
+                  ? "bg-green-100 text-green-700"
+                  : "text-gray-600 hover:bg-green-50"
+              } disabled:opacity-50 disabled:cursor-not-allowed`}
+            >
+              {userVote === "upvote" ? (
+                <HandThumbUpSolidIcon className="h-5 w-5 mr-1" />
+              ) : (
+                <HandThumbUpIcon className="h-5 w-5 mr-1" />
+              )}
+              {post.votes.upvotes}
+            </button>
 
-              <button
-                onClick={() => handleVote("downvote")}
-                disabled={isVoting || !isAuthenticated}
-                className={`flex items-center space-x-2 rounded-lg px-4 py-2 text-sm transition-colors ${
-                  userVote === "downvote"
-                    ? "bg-red-100 text-red-700"
-                    : "text-gray-600 border border-gray-300 hover:bg-red-50"
-                } disabled:opacity-50 disabled:cursor-not-allowed`}
-              >
-                {userVote === "downvote" ? (
-                  <HandThumbDownSolidIcon className="h-5 w-5" />
-                ) : (
-                  <HandThumbDownIcon className="h-5 w-5" />
-                )}
-                <span className="font-medium">{post.votes.downvotes}</span>
-              </button>
-            </div>
+            <button
+              onClick={() => handleVote("downvote")}
+              disabled={!!isAuthor || !isAuthenticated}
+              className={`flex items-center rounded-lg border border-gray-300 px-4 py-2 text-sm transition ${
+                userVote === "downvote"
+                  ? "bg-red-100 text-red-700"
+                  : "text-gray-600 hover:bg-red-50"
+              } disabled:opacity-50 disabled:cursor-not-allowed`}
+            >
+              {userVote === "downvote" ? (
+                <HandThumbDownSolidIcon className="h-5 w-5 mr-1" />
+              ) : (
+                <HandThumbDownIcon className="h-5 w-5 mr-1" />
+              )}
+              {post.votes.downvotes}
+            </button>
 
-            <div className="text-sm text-gray-600 whitespace-nowrap">
-              Score: <span className="font-medium">{post.votes.score}</span>
-            </div>
+            <span className="text-gray-600">
+              Score: <span className="font-semibold">{post.votes.score}</span>
+            </span>
 
-            {/* Quick Share Button */}
             <button
               onClick={handleShare}
-              className="ml-auto flex items-center space-x-2 rounded-lg border border-gray-300 px-4 py-2 text-sm hover:bg-gray-50 transition-colors"
+              className="ml-auto rounded-lg border border-gray-300 px-4 py-2 text-sm flex items-center space-x-2 hover:bg-gray-50"
             >
               <ShareIcon className="h-4 w-4" />
               <span>Share</span>
             </button>
           </div>
 
-          <div className="px-8 pb-12 text-gray-800 text-base leading-relaxed space-y-6 md:max-w-4xl mx-auto text-left">
+          {/* Post content */}
+          <div className="prose max-w-none px-6 sm:px-8 pb-12 mx-auto text-left">
             <ReactMarkdown>{post.content}</ReactMarkdown>
           </div>
-        </article>
 
-        {/* Comments Section */}
-        <div className="max-w-4xl mx-auto mt-8 px-4 sm:px-6 lg:px-8">
-          <CommentSection postId={post._id} />
-        </div>
+          {/* Comments */}
+          <div className="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+            <CommentSection postId={post._id} />
+          </div>
+        </article>
       </main>
 
+      {/* Modals */}
       <ShareModal
         isOpen={showShareModal}
         onClose={() => setShowShareModal(false)}
         postTitle={post.title}
         postSlug={post.slug}
       />
-
       <DeleteConfirmModal
         isOpen={showDeleteModal}
         onClose={() => !isDeleting && setShowDeleteModal(false)}

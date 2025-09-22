@@ -4,7 +4,6 @@ import Navbar from "../components/layout/Navbar";
 import MdEditor from "react-markdown-editor-lite";
 import "react-markdown-editor-lite/lib/index.css";
 import ReactMarkdown from "react-markdown";
-// import CommentForm from "../components/CommentForm";
 import {
   ArrowLeftIcon,
   PencilIcon,
@@ -56,9 +55,9 @@ const EditPost: React.FC = () => {
         setError("Post not found");
       }
     } catch (err: unknown) {
-      const error = err as { response?: { data?: { message?: string } } };
       const errorMessage =
-        error?.response?.data?.message || "Failed to load post";
+        (err as { response?: { data?: { message?: string } } })?.response?.data
+          ?.message || "Failed to load post";
       setError(errorMessage);
     } finally {
       setLoading(false);
@@ -74,7 +73,7 @@ const EditPost: React.FC = () => {
     tagsString
       .split(",")
       .map((tag) => tag.trim().toLowerCase())
-      .filter((tag) => tag.length > 0)
+      .filter((tag) => tag.length)
       .slice(0, 10);
 
   const validateForm = (): boolean => {
@@ -113,9 +112,9 @@ const EditPost: React.FC = () => {
         navigate(`/posts/${response.data.post.slug}`);
       }
     } catch (err: unknown) {
-      const error = err as { response?: { data?: { message?: string } } };
       const errorMessage =
-        error?.response?.data?.message || "Failed to update post";
+        (err as { response?: { data?: { message?: string } } })?.response?.data
+          ?.message || "Failed to update post";
       showError(errorMessage);
     } finally {
       setIsSubmitting(false);
@@ -127,26 +126,23 @@ const EditPost: React.FC = () => {
     else navigate("/dashboard");
   };
 
-  const wordCount = formData.content
-    .trim()
-    .split(/\s+/)
-    .filter((w) => w.length > 0).length;
+  const wordCount = formData.content.trim().split(/\s+/).filter(Boolean).length;
   const readTime = Math.max(1, Math.ceil(wordCount / 200));
 
   const hasChanges =
-    post &&
+    !!post &&
     (formData.title !== post.title ||
       formData.content !== post.content ||
       formData.tags !== post.tags.join(", "));
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
+      <div className="min-h-screen bg-gray-50 flex flex-col">
         <Navbar />
-        <div className="max-w-4xl w-full mx-auto px-4 py-10">
+        <div className="flex-grow flex items-center justify-center px-4">
           <div className="text-center">
             <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mx-auto"></div>
-            <p className="mt-4 text-gray-600">Loading post...</p>
+            <p className="mt-4 text-gray-600 text-lg">Loading post...</p>
           </div>
         </div>
       </div>
@@ -155,17 +151,15 @@ const EditPost: React.FC = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center px-4">
+      <div className="min-h-screen bg-gray-50 flex flex-col">
         <Navbar />
-        <div className="max-w-4xl w-full mx-auto px-4 py-10">
-          <div className="text-center">
+        <div className="flex-grow flex flex-col items-center justify-center px-4">
+          <div className="text-center max-w-lg">
             <ExclamationTriangleIcon className="mx-auto mb-4 h-12 w-12 text-red-500" />
-            <h3 className="mb-2 text-lg font-semibold text-gray-900">
-              {error}
-            </h3>
+            <h3 className="mb-2 text-lg font-semibold">{error}</h3>
             <button
               onClick={() => navigate("/dashboard")}
-              className="inline-block bg-blue-600 px-6 py-2 rounded-lg text-white font-medium hover:bg-blue-700 transition"
+              className="mt-4 inline-block bg-blue-600 py-2 px-6 rounded-md text-white hover:bg-blue-700 transition"
             >
               Back to Dashboard
             </button>
@@ -176,29 +170,30 @@ const EditPost: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col px-4 py-10">
+    <div className="min-h-screen bg-gray-50 flex flex-col">
       <Navbar />
-      <main className="max-w-4xl w-full mx-auto">
-        <div className="mb-8 flex flex-col sm:flex-row items-center justify-between space-y-4 sm:space-y-0">
+      <main className="flex-grow max-w-3xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8">
+        <div className="mb-6 flex flex-col sm:flex-row items-center justify-between gap-4">
           <button
             onClick={() => navigate(-1)}
-            className="flex items-center space-x-2 text-gray-600 hover:text-blue-600 transition"
+            className="inline-flex items-center space-x-2 rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 transition"
           >
             <ArrowLeftIcon className="h-4 w-4" />
             <span>Back</span>
           </button>
-          {hasChanges && (
-            <div className="flex items-center space-x-2 bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm">
+          {!!hasChanges && (
+            <div className="inline-flex items-center space-x-2 bg-amber-100 text-amber-800 px-3 py-1 rounded-full text-sm">
               <PencilIcon className="h-4 w-4" />
               <span>Unsaved changes</span>
             </div>
           )}
         </div>
-        <section className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
+
+        <section className="bg-white rounded-lg border border-gray-200 shadow p-6">
           <header className="mb-6">
             <div className="flex items-center space-x-2 mb-2">
               <PencilIcon className="h-6 w-6 text-blue-600" />
-              <h1 className="text-3xl font-bold text-gray-900">Edit Post</h1>
+              <h1 className="text-3xl font-bold">Edit Post</h1>
             </div>
             <p className="text-gray-600">
               Make changes to your post and save when ready.
@@ -207,18 +202,19 @@ const EditPost: React.FC = () => {
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label className="block mb-1 text-sm font-medium text-gray-700">
+              <label htmlFor="title" className="block mb-1 text-sm font-medium">
                 Title *
               </label>
               <input
-                type="text"
+                id="title"
                 name="title"
+                type="text"
                 value={formData.title}
                 onChange={handleInputChange}
                 disabled={isSubmitting}
                 maxLength={200}
                 placeholder="Enter post title"
-                className="w-full rounded-md border border-gray-300 px-4 py-3 text-lg font-medium focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
+                className="w-full rounded border border-gray-300 px-4 py-3 text-lg font-medium focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
               />
               <div className="mt-1 flex justify-between text-xs text-gray-500">
                 <span>Make it catchy and descriptive</span>
@@ -227,25 +223,29 @@ const EditPost: React.FC = () => {
             </div>
 
             <div>
-              <label className="block mb-1 text-sm font-medium text-gray-700">
+              <label htmlFor="tags" className="block mb-1 text-sm font-medium">
                 Tags
               </label>
               <input
-                type="text"
+                id="tags"
                 name="tags"
+                type="text"
                 value={formData.tags}
                 onChange={handleInputChange}
                 disabled={isSubmitting}
                 placeholder="react, javascript, web development"
-                className="w-full rounded-md border border-gray-300 px-4 py-3 text-base focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
+                className="w-full rounded border border-gray-300 px-4 py-3 text-base focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
               />
-              <div className="mt-1 text-sm text-gray-500">
-                Add up to 10 tags, comma separated
-              </div>
+              <p className="mt-1 text-xs text-gray-500">
+                Add up to 10 tags separated by commas
+              </p>
             </div>
 
             <div>
-              <label className="block mb-1 text-sm font-medium text-gray-700 flex justify-between">
+              <label
+                htmlFor="content"
+                className="block mb-1 flex justify-between text-sm font-medium"
+              >
                 <span>Content *</span>
                 <span className="text-xs text-gray-500">
                   {wordCount} words • {readTime} min read
@@ -259,24 +259,24 @@ const EditPost: React.FC = () => {
                   setFormData((prev) => ({ ...prev, content: text }))
                 }
                 readOnly={isSubmitting}
-                placeholder="Edit post content using markdown"
+                config={{ view: { menu: true, md: true, html: false } }}
+                id="content"
               />
               <div className="mt-1 flex justify-between text-xs text-gray-500">
-                <span>Min 50 characters required</span>
-                <span>{formData.content.length}/50,000</span>
+                <span>Minimum 50 characters required</span>
+                <span>{formData.content.length}/50000</span>
               </div>
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-4 border-t border-gray-200 pt-6">
+            <div className="mt-6 flex flex-col sm:flex-row gap-4 border-t border-gray-200 pt-6">
               <button
                 type="button"
                 onClick={handleCancel}
                 disabled={isSubmitting}
-                className="rounded-md border border-gray-300 px-6 py-3 text-gray-700 hover:bg-gray-50 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                className="rounded border border-gray-300 px-6 py-3 text-center text-base text-gray-700 hover:bg-gray-100 disabled:bg-gray-100 disabled:cursor-not-allowed transition"
               >
                 Cancel
               </button>
-
               <button
                 type="submit"
                 disabled={
@@ -285,18 +285,15 @@ const EditPost: React.FC = () => {
                   !formData.title.trim() ||
                   !formData.content.trim()
                 }
-                className="rounded-md bg-blue-600 px-8 py-3 text-white hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="rounded bg-blue-600 px-6 py-3 text-center text-base text-white hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed"
               >
                 {isSubmitting ? (
-                  <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                    Updating...
-                  </>
+                  <div className="flex items-center justify-center space-x-2">
+                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
+                    <span>Updating...</span>
+                  </div>
                 ) : (
-                  <>
-                    <PencilIcon className="h-5 w-5" />
-                    Update Post
-                  </>
+                  "Update Post"
                 )}
               </button>
             </div>
