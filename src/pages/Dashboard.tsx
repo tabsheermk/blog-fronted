@@ -2,6 +2,7 @@ import React, { useState, useMemo } from "react";
 import Navbar from "../components/layout/Navbar";
 import PostCard from "../components/ui/PostCard";
 import { usePosts } from "../hooks/usePosts";
+import { useAuth } from "../contexts/AuthContext";
 import {
   FireIcon,
   ClockIcon,
@@ -15,34 +16,49 @@ const Dashboard: React.FC = () => {
     "popular"
   );
   const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
+  const [viewMyPosts, setViewMyPosts] = useState(false);
+  const { user } = useAuth();
 
-  // Memoize the options to prevent unnecessary re-renders
+  // Debounce search term
+  React.useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
+  // Memoize options for posts hook, with author if "My Posts"
   const postsOptions = useMemo(
     () => ({
       sort: sortBy,
-      search: searchTerm || undefined,
+      search: debouncedSearchTerm || undefined,
       limit: 10,
+      author: viewMyPosts && user ? user.id : undefined,
     }),
-    [sortBy, searchTerm]
+    [sortBy, debouncedSearchTerm, viewMyPosts, user]
   );
 
   // Fetch posts with current filters
-  const { posts, error, pagination, refetch } = usePosts(postsOptions);
+  const postsQuery = usePosts(postsOptions);
 
-  // Stats calculations
+  // Stats
   const stats = useMemo(() => {
-    const totalUpvotes = posts.reduce(
+    const totalUpvotes = postsQuery.posts.reduce(
       (sum, post) => sum + post.votes.upvotes,
       0
     );
-    const totalReadTime = posts.reduce((sum, post) => sum + post.readTime, 0);
+    const totalReadTime = postsQuery.posts.reduce(
+      (sum, post) => sum + post.readTime,
+      0
+    );
 
     return {
-      totalPosts: pagination?.totalPosts || 0,
+      totalPosts: postsQuery.pagination?.totalPosts || 0,
       totalUpvotes,
       totalReadTime,
     };
-  }, [posts, pagination]);
+  }, [postsQuery.posts, postsQuery.pagination]);
 
   const handleSortChange = (newSort: "popular" | "latest" | "oldest") => {
     setSortBy(newSort);
@@ -50,35 +66,10 @@ const Dashboard: React.FC = () => {
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // The search will trigger automatically via the usePosts hook
+    // Search handled by debounced state
   };
 
-  // Add debounced search
-  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
-
-  // Debounce search term
-  React.useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedSearchTerm(searchTerm);
-    }, 500); // 500ms delay
-
-    return () => clearTimeout(timer);
-  }, [searchTerm]);
-
-  // Update the memoized options to use debounced search
-  const debouncedPostsOptions = useMemo(
-    () => ({
-      sort: sortBy,
-      search: debouncedSearchTerm || undefined,
-      limit: 10,
-    }),
-    [sortBy, debouncedSearchTerm]
-  );
-
-  // Use debounced options
-  const postsQuery = usePosts(debouncedPostsOptions);
-
-  if (error && !posts.length) {
+  if (postsQuery.error && postsQuery.posts.length === 0) {
     return (
       <div className="min-h-screen bg-gray-50">
         <Navbar />
@@ -88,9 +79,9 @@ const Dashboard: React.FC = () => {
             <h3 className="text-lg font-semibold text-gray-900 mb-2">
               Failed to load posts
             </h3>
-            <p className="text-gray-600 mb-4">{error}</p>
+            <p className="text-gray-600 mb-4">{postsQuery.error}</p>
             <button
-              onClick={refetch}
+              onClick={postsQuery.refetch}
               className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
             >
               Try Again
@@ -107,14 +98,40 @@ const Dashboard: React.FC = () => {
 
       {/* Main Content */}
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Welcome back! 👋
-          </h1>
-          <p className="text-lg text-gray-600">
-            Discover the latest tech insights from our community
-          </p>
+        {/* Header: Welcome + Toggle */}
+        <div className="mb-8 flex flex-col md:flex-row md:items-end md:justify-between gap-2">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+              Welcome back! 👋
+            </h1>
+            <p className="text-lg text-gray-600">
+              {viewMyPosts
+                ? "Review your own blog posts below"
+                : "Discover the latest tech insights from our community"}
+            </p>
+          </div>
+          <div className="flex gap-2 mt-4 md:mt-0">
+            <button
+              onClick={() => setViewMyPosts(false)}
+              className={`px-4 py-2 rounded-lg text-sm font-medium border ${
+                !viewMyPosts
+                  ? "bg-blue-600 text-white"
+                  : "bg-white text-gray-700"
+              }`}
+            >
+              All Posts
+            </button>
+            <button
+              onClick={() => setViewMyPosts(true)}
+              className={`px-4 py-2 rounded-lg text-sm font-medium border ${
+                viewMyPosts
+                  ? "bg-blue-600 text-white"
+                  : "bg-white text-gray-700"
+              }`}
+            >
+              My Posts
+            </button>
+          </div>
         </div>
 
         {/* Search and Filter Controls */}
@@ -128,7 +145,9 @@ const Dashboard: React.FC = () => {
               <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
               <input
                 type="text"
-                placeholder="Search posts..."
+                placeholder={
+                  viewMyPosts ? "Search your posts..." : "Search posts..."
+                }
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -147,6 +166,7 @@ const Dashboard: React.FC = () => {
               </span>
               <div className="flex rounded-lg border border-gray-300 overflow-hidden">
                 <button
+                  type="button"
                   onClick={() => handleSortChange("popular")}
                   className={`flex items-center space-x-2 px-4 py-2 text-sm font-medium transition-colors ${
                     sortBy === "popular"
@@ -158,6 +178,7 @@ const Dashboard: React.FC = () => {
                   <span>Popular</span>
                 </button>
                 <button
+                  type="button"
                   onClick={() => handleSortChange("latest")}
                   className={`flex items-center space-x-2 px-4 py-2 text-sm font-medium transition-colors border-l border-gray-300 ${
                     sortBy === "latest"
@@ -169,6 +190,7 @@ const Dashboard: React.FC = () => {
                   <span>Latest</span>
                 </button>
                 <button
+                  type="button"
                   onClick={() => handleSortChange("oldest")}
                   className={`flex items-center space-x-2 px-4 py-2 text-sm font-medium transition-colors border-l border-gray-300 ${
                     sortBy === "oldest"
@@ -195,11 +217,12 @@ const Dashboard: React.FC = () => {
                 <p className="text-2xl font-semibold text-gray-900">
                   {stats.totalPosts}
                 </p>
-                <p className="text-sm text-gray-600">Total Posts</p>
+                <p className="text-sm text-gray-600">
+                  {viewMyPosts ? "My Posts" : "Total Posts"}
+                </p>
               </div>
             </div>
           </div>
-
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <div className="flex items-center">
               <div className="p-2 bg-green-100 rounded-lg">
@@ -213,7 +236,6 @@ const Dashboard: React.FC = () => {
               </div>
             </div>
           </div>
-
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <div className="flex items-center">
               <div className="p-2 bg-purple-100 rounded-lg">
@@ -233,9 +255,13 @@ const Dashboard: React.FC = () => {
         <div className="space-y-6">
           <h2 className="text-2xl font-bold text-gray-900 flex items-center space-x-2">
             <span>
-              {sortBy === "popular" && "🏆 Popular Posts"}
-              {sortBy === "latest" && "🕒 Latest Posts"}
-              {sortBy === "oldest" && "📜 Oldest Posts"}
+              {viewMyPosts
+                ? "My Posts"
+                : sortBy === "popular"
+                ? "🏆 Popular Posts"
+                : sortBy === "latest"
+                ? "🕒 Latest Posts"
+                : "📜 Oldest Posts"}
             </span>
             {debouncedSearchTerm && (
               <span className="text-base font-normal text-gray-600">
@@ -258,9 +284,11 @@ const Dashboard: React.FC = () => {
               <p className="text-gray-500 text-lg">
                 {debouncedSearchTerm
                   ? "No posts found matching your search."
+                  : viewMyPosts
+                  ? "You haven't written any posts yet."
                   : "No posts available yet."}
               </p>
-              {!debouncedSearchTerm && (
+              {!debouncedSearchTerm && !viewMyPosts && (
                 <button
                   onClick={() => (window.location.href = "/write")}
                   className="mt-4 bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
@@ -279,7 +307,6 @@ const Dashboard: React.FC = () => {
                   <PostCard key={post._id} post={post} />
                 ))}
               </div>
-
               {/* Load More Button */}
               {postsQuery.canLoadMore && (
                 <div className="text-center pt-8">
@@ -299,7 +326,6 @@ const Dashboard: React.FC = () => {
                   </button>
                 </div>
               )}
-
               {/* Pagination Info */}
               {postsQuery.pagination && (
                 <div className="text-center text-sm text-gray-600 pt-4">

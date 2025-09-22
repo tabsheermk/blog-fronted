@@ -50,7 +50,7 @@ const Login: React.FC = () => {
     try {
       await login({
         email: "demo@devblog.com",
-        password: "DemoPassword123!",
+        password: "Demo123$",
       });
       showSuccess("Welcome, Demo User! 🎉");
       navigate(from, { replace: true });
