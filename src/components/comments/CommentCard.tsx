@@ -18,7 +18,6 @@ import {
   HandThumbUpIcon as HandThumbUpSolid,
   HandThumbDownIcon as HandThumbDownSolid,
 } from "@heroicons/react/24/solid";
-// import ReactMarkdown from "react-markdown";
 
 interface CommentCardProps {
   comment: Comment;
@@ -49,19 +48,19 @@ const CommentCard: React.FC<CommentCardProps> = ({
   const isAuthor = user && comment.author === user.id;
   const canReply = isAuthenticated && depth < maxDepth;
 
-  const formatDate = (dateStr: string) => {
-    const date = new Date(dateStr);
-    const seconds = (Date.now() - date.getTime()) / 1000;
+  const formatDate = (str: string) => {
+    const d = new Date(str);
+    const seconds = (Date.now() - d.getTime()) / 1000;
     if (seconds < 60) return `${Math.floor(seconds)}s ago`;
     if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
     if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
     if (seconds < 604800) return `${Math.floor(seconds / 86400)}d ago`;
-    return date.toLocaleDateString();
+    return d.toLocaleDateString();
   };
 
   const handleVote = async (type: "upvote" | "downvote") => {
     if (!isAuthenticated) {
-      showError("Please login to vote");
+      showError("Please login");
       return;
     }
     if (isVoting) return;
@@ -95,22 +94,14 @@ const CommentCard: React.FC<CommentCardProps> = ({
     setShowReplyForm(false);
   };
 
-  // Optional: Implement editing like below if needed
-  // const handleEdit = async (content: string) => {
-  //   await onUpdate(comment._id, content);
-  //   setShowEditForm(false);
-  // };
-
   const handleDelete = async () => {
-    if (!window.confirm("Are you sure you want to delete this comment?"))
-      return;
-
+    if (!window.confirm("Are you sure?")) return;
     setIsDeleting(true);
     try {
       await onDelete(comment._id);
       showSuccess("Comment deleted");
     } catch {
-      // ignore errors for now
+      // ignore errors
     } finally {
       setIsDeleting(false);
     }
@@ -118,7 +109,6 @@ const CommentCard: React.FC<CommentCardProps> = ({
 
   const toggleReplies = () => setShowReplies((v) => !v);
 
-  // Dynamic indentation via inline style
   const indentPx = Math.min(depth * 16, 64);
 
   if (comment.isDeleted) {
@@ -141,38 +131,38 @@ const CommentCard: React.FC<CommentCardProps> = ({
     >
       <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow">
         <div className="flex flex-col sm:flex-row sm:justify-between gap-4">
-          {/* Left: Avatar & author */}
           <div className="flex gap-3">
             <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold select-none">
               {comment.authorDetails.firstName[0]}
               {comment.authorDetails.lastName[0]}
             </div>
-            <div className="min-w-0">
+
+            <div className="min-w-0 flex flex-col">
               <p className="font-medium text-gray-900 truncate">
                 {comment.authorDetails.firstName}{" "}
                 {comment.authorDetails.lastName}
               </p>
+
               <p className="text-xs text-gray-500 flex items-center gap-1 select-none">
-                <CalendarIcon className="w-3 h-3" />{" "}
-                {formatDate(comment.createdAt)}{" "}
-                {comment.isEdited && <em>· edited</em>}
+                <CalendarIcon className="w-3 h-3" />
+                {formatDate(comment.createdAt)}
+                {comment.isEdited && <em> · edited</em>}
               </p>
-            </div>
-            <div className="mt-2 text-gray-800 whitespace-pre-wrap leading-relaxed break-words max-w-full">
-              {comment.content}
+
+              <div className="mt-2 text-gray-800 whitespace-pre-wrap break-words leading-relaxed max-w-full">
+                {comment.content}
+              </div>
             </div>
           </div>
 
-          {/* Right: Actions */}
           <div className="flex flex-wrap items-center gap-2">
-            {/* Votes */}
             <button
               onClick={() => handleVote("upvote")}
               disabled={!isAuthenticated || isVoting}
               className={`flex items-center gap-1 rounded px-2 py-1 text-sm transition ${
                 userVote === "upvote"
                   ? "bg-green-100 text-green-700"
-                  : "text-gray-600 hover:bg-green-50"
+                  : "hover:bg-green-50 text-gray-600"
               } disabled:opacity-50 disabled:pointer-events-none`}
             >
               {userVote === "upvote" ? (
@@ -189,7 +179,7 @@ const CommentCard: React.FC<CommentCardProps> = ({
               className={`flex items-center gap-1 rounded px-2 py-1 text-sm transition ${
                 userVote === "downvote"
                   ? "bg-red-100 text-red-700"
-                  : "text-gray-600 hover:bg-red-50"
+                  : "hover:bg-green-50 text-gray-600"
               } disabled:opacity-50 disabled:pointer-events-none`}
             >
               {userVote === "downvote" ? (
@@ -200,17 +190,16 @@ const CommentCard: React.FC<CommentCardProps> = ({
               <span>{comment.votes.downvotes}</span>
             </button>
 
-            {/* Reply */}
             {canReply && (
               <button
                 onClick={() => setShowReplyForm((v) => !v)}
                 className="flex items-center gap-1 rounded px-2 py-1 text-sm text-blue-600 hover:text-blue-800 transition whitespace-nowrap"
               >
-                <ChatBubbleLeftIcon className="w-4 h-4" /> <span>Reply</span>
+                <ChatBubbleLeftIcon className="w-4 h-4" />
+                <span>Reply</span>
               </button>
             )}
 
-            {/* Toggle Replies */}
             {comment.replyCount > 0 && (
               <button
                 onClick={toggleReplies}
@@ -219,19 +208,18 @@ const CommentCard: React.FC<CommentCardProps> = ({
               >
                 {showReplies ? (
                   <>
-                    <ChevronUpIcon className="w-4 h-4" />{" "}
+                    <ChevronUpIcon className="w-4 h-4" />
                     <span>Hide Replies ({comment.replyCount})</span>
                   </>
                 ) : (
                   <>
-                    <ChevronDownIcon className="w-4 h-4" />{" "}
+                    <ChevronDownIcon className="w-4 h-4" />
                     <span>Show Replies ({comment.replyCount})</span>
                   </>
                 )}
               </button>
             )}
 
-            {/* Author controls */}
             {isAuthor && !showEditForm && (
               <>
                 <button
@@ -254,7 +242,6 @@ const CommentCard: React.FC<CommentCardProps> = ({
           </div>
         </div>
 
-        {/* Reply Form */}
         {showReplyForm && (
           <div className="ml-10 mt-3 sm:ml-16">
             <CommentForm
@@ -267,7 +254,6 @@ const CommentCard: React.FC<CommentCardProps> = ({
           </div>
         )}
 
-        {/* Nested replies */}
         {showReplies &&
           Array.isArray(comment.replies) &&
           comment.replies.length > 0 && (

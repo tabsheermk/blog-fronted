@@ -185,12 +185,12 @@ const PostDetail: React.FC = () => {
       <Navbar />
       <main className="max-w-4xl mx-auto">
         {/* Back Navigation */}
-        <div className="mb-6">
+        <div className="mb-6 flex justify-start">
           <button
             onClick={() => navigate(-1)}
-            className="inline-flex items-center space-x-2 text-gray-600 hover:text-blue-600 transition"
+            className="inline-flex items-center space-x-2 rounded-md border border-gray-300 px-3 py-2 text-gray-700 hover:bg-gray-100 transition"
           >
-            <ArrowLeftIcon className="h-4 w-4" />
+            <ArrowLeftIcon className="h-5 w-5" />
             <span>Back</span>
           </button>
         </div>

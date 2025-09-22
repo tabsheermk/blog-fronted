@@ -148,11 +148,12 @@ const CommentSection: React.FC<CommentSectionProps> = ({ postId }) => {
   ): Comment[] =>
     comments.map((comment) => {
       if (comment._id === id) return updated;
-      if (comment.replies?.length)
+      if (comment.replies?.length) {
         return {
           ...comment,
           replies: updateCommentInTree(comment.replies, id, updated),
         };
+      }
       return comment;
     });
 
@@ -160,11 +161,12 @@ const CommentSection: React.FC<CommentSectionProps> = ({ postId }) => {
     comments.map((comment) => {
       if (comment._id === id)
         return { ...comment, isDeleted: true, content: "[Comment deleted]" };
-      if (comment.replies?.length)
+      if (comment.replies?.length) {
         return {
           ...comment,
           replies: markCommentAsDeleted(comment.replies, id),
         };
+      }
       return comment;
     });
 

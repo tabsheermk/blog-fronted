@@ -91,17 +91,18 @@ const Dashboard: React.FC = () => {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         {/* Header with welcome and toggle buttons */}
         <div className="mb-8 flex flex-col md:flex-row md:items-end md:justify-between gap-4">
-          <div>
+          <div className="text-center md:text-left flex-1">
             <h1 className="text-3xl font-bold text-gray-900 mb-1">
               Welcome back! 👋
             </h1>
-            <p className="text-lg text-gray-600">
+            <p className="text-lg text-gray-600 max-w-md mx-auto md:max-w-none">
               {viewMyPosts
-                ? "Review your own blog posts below"
-                : "Discover the latest tech insights from the community"}
+                ? "Review your own posts below"
+                : "Discover the latest insights from the community"}
             </p>
           </div>
-          <div className="flex gap-2">
+
+          <div className="flex justify-center md:justify-start gap-2">
             <button
               className={`rounded border px-4 py-2 font-medium text-sm transition ${
                 !viewMyPosts
