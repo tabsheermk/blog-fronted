@@ -3,7 +3,10 @@ import { useNavigate } from "react-router-dom";
 import Navbar from "../components/layout/Navbar";
 import { postService } from "../services/postsService";
 import { showSuccess, showError } from "../utils/toast";
-import { PaperAirplaneIcon, DocumentIcon } from "@heroicons/react/24/outline";
+import { PaperAirplaneIcon } from "@heroicons/react/24/outline";
+import MdEditor from "react-markdown-editor-lite";
+import "react-markdown-editor-lite/lib/index.css";
+import ReactMarkdown from "react-markdown";
 
 interface FormData {
   title: string;
@@ -19,11 +22,8 @@ const Write: React.FC = () => {
     tags: "",
   });
   const [isLoading, setIsLoading] = useState(false);
-  const [isDraft, setIsDraft] = useState(false);
 
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
@@ -36,7 +36,7 @@ const Write: React.FC = () => {
       .split(",")
       .map((tag) => tag.trim().toLowerCase())
       .filter((tag) => tag.length > 0)
-      .slice(0, 10); // Limit to 10 tags
+      .slice(0, 10);
   };
 
   const validateForm = (): boolean => {
@@ -44,85 +44,59 @@ const Write: React.FC = () => {
       showError("Please enter a title");
       return false;
     }
-
     if (formData.title.trim().length < 5) {
       showError("Title must be at least 5 characters long");
       return false;
     }
-
     if (!formData.content.trim()) {
       showError("Please enter content");
       return false;
     }
-
     if (formData.content.trim().length < 50) {
       showError("Content must be at least 50 characters long");
       return false;
     }
-
     return true;
   };
 
-  const handleSubmit = async (
-    e: React.FormEvent,
-    isPublished: boolean = true
-  ) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     if (!validateForm()) return;
-
     setIsLoading(true);
-
     try {
       const postData = {
         title: formData.title.trim(),
         content: formData.content.trim(),
         tags: processTags(formData.tags),
       };
-
       const response = await postService.createPost(postData);
-
       if (response.success) {
-        showSuccess(
-          isPublished
-            ? "🎉 Post published successfully!"
-            : "💾 Draft saved successfully!"
-        );
-
-        // Navigate to the created post or dashboard
-        navigate("/dashboard");
+        showSuccess("🎉 Post published successfully!");
+        navigate(`/posts/${response.data.post.slug}`);
       }
     } catch (error: unknown) {
       const err = error as { response?: { data?: { message?: string } } };
       const errorMessage =
         err.response?.data?.message || "Failed to create post";
       showError(errorMessage);
-      console.error("Create post error:", error);
     } finally {
       setIsLoading(false);
-      setIsDraft(false);
     }
   };
 
-  const handleSaveDraft = (e: React.FormEvent) => {
-    setIsDraft(true);
-    handleSubmit(e, false);
-  };
-
-  const handlePublish = (e: React.FormEvent) => {
-    handleSubmit(e, true);
+  const handleCancel = () => {
+    navigate("/dashboard");
   };
 
   const wordCount = formData.content
     .trim()
     .split(/\s+/)
-    .filter((word) => word.length > 0).length;
-  const readTime = Math.max(1, Math.ceil(wordCount / 200)); // 200 words per minute
+    .filter((w) => w.length > 0).length;
+  const readTime = Math.max(1, Math.ceil(wordCount / 200));
 
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
-
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
           <div className="mb-8">
@@ -133,8 +107,7 @@ const Write: React.FC = () => {
               Share your knowledge with the tech community
             </p>
           </div>
-
-          <form className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-6">
             {/* Title */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -155,7 +128,6 @@ const Write: React.FC = () => {
                 <span>{formData.title.length}/200</span>
               </div>
             </div>
-
             {/* Tags */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -171,7 +143,7 @@ const Write: React.FC = () => {
                 placeholder="react, javascript, web-development, typescript (comma separated)"
               />
               <div className="mt-1 text-xs text-gray-500">
-                Add up to 10 relevant tags to help others find your post
+                Add up to 10 relevant tags
               </div>
               {formData.tags && (
                 <div className="mt-2 flex flex-wrap gap-2">
@@ -186,8 +158,7 @@ const Write: React.FC = () => {
                 </div>
               )}
             </div>
-
-            {/* Content */}
+            {/* Markdown Editor */}
             <div>
               <div className="flex justify-between items-center mb-2">
                 <label className="block text-sm font-medium text-gray-700">
@@ -197,56 +168,33 @@ const Write: React.FC = () => {
                   {wordCount} words • ~{readTime} min read
                 </div>
               </div>
-              <textarea
-                name="content"
+              <MdEditor
                 value={formData.content}
-                onChange={handleInputChange}
-                disabled={isLoading}
-                rows={16}
-                maxLength={50000}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none disabled:bg-gray-100 disabled:cursor-not-allowed font-mono text-sm leading-relaxed"
-                placeholder="Start writing your post..."
+                style={{ height: "400px" }}
+                renderHTML={(text) => <ReactMarkdown>{text}</ReactMarkdown>}
+                onChange={({ text }) =>
+                  setFormData((prev) => ({ ...prev, content: text }))
+                }
+                readOnly={isLoading}
+                placeholder="Write your post content here using markdown..."
               />
               <div className="mt-1 flex justify-between text-xs text-gray-500">
                 <span>Minimum 50 characters required</span>
                 <span>{formData.content.length}/50,000</span>
               </div>
             </div>
-
-            {/* Preview Section */}
-            {formData.content && (
-              <div className="border border-gray-200 rounded-lg p-4 bg-gray-50">
-                <h4 className="text-sm font-medium text-gray-700 mb-2">
-                  Content Preview:
-                </h4>
-                <div className="text-sm text-gray-600 line-clamp-3">
-                  {formData.content.substring(0, 200)}
-                  {formData.content.length > 200 && "..."}
-                </div>
-              </div>
-            )}
-
             {/* Action Buttons */}
             <div className="flex flex-col sm:flex-row gap-4 pt-6 border-t border-gray-200">
               <button
                 type="button"
-                onClick={handleSaveDraft}
-                disabled={
-                  isLoading ||
-                  !formData.title.trim() ||
-                  !formData.content.trim()
-                }
+                onClick={handleCancel}
+                disabled={isLoading}
                 className="flex items-center justify-center space-x-2 px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 disabled:bg-gray-100 disabled:cursor-not-allowed transition-colors font-medium"
               >
-                <DocumentIcon className="h-4 w-4" />
-                <span>
-                  {isDraft && isLoading ? "Saving Draft..." : "Save Draft"}
-                </span>
+                <span>Cancel</span>
               </button>
-
               <button
-                type="button"
-                onClick={handlePublish}
+                type="submit"
                 disabled={
                   isLoading ||
                   !formData.title.trim() ||
@@ -254,37 +202,30 @@ const Write: React.FC = () => {
                 }
                 className="flex items-center justify-center space-x-2 px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed transition-colors font-medium flex-1 sm:flex-none"
               >
-                <PaperAirplaneIcon className="h-4 w-4" />
-                <span>
-                  {!isDraft && isLoading ? (
-                    <>
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2 inline-block"></div>
-                      Publishing...
-                    </>
-                  ) : (
-                    "Publish Post"
-                  )}
-                </span>
+                {isLoading ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2 inline-block"></div>
+                    <span>Publishing...</span>
+                  </>
+                ) : (
+                  <>
+                    <PaperAirplaneIcon className="h-4 w-4" />
+                    <span>Publish Post</span>
+                  </>
+                )}
               </button>
             </div>
-
             {/* Writing Tips */}
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
               <h4 className="text-sm font-semibold text-blue-900 mb-2">
                 ✨ Writing Tips:
               </h4>
               <ul className="text-xs text-blue-800 space-y-1">
-                <li>
-                  • Start with a compelling introduction that hooks your readers
-                </li>
-                <li>
-                  • Use clear headings and subheadings to organize your content
-                </li>
-                <li>• Include code examples and practical insights</li>
+                <li>• Start with a compelling introduction</li>
+                <li>• Use headings, code, and lists for clarity</li>
+                <li>• Show code examples and practical insights</li>
                 <li>• End with a conclusion or call-to-action</li>
-                <li>
-                  • Choose relevant tags to help others discover your post
-                </li>
+                <li>• Use relevant tags</li>
               </ul>
             </div>
           </form>

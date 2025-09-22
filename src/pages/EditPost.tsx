@@ -10,6 +10,9 @@ import {
   ArrowLeftIcon,
   ExclamationTriangleIcon,
 } from "@heroicons/react/24/outline";
+import MdEditor from "react-markdown-editor-lite";
+import "react-markdown-editor-lite/lib/index.css";
+import ReactMarkdown from "react-markdown";
 
 const EditPost: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -37,18 +40,13 @@ const EditPost: React.FC = () => {
     try {
       setLoading(true);
       setError(null);
-
       const response = await postService.getPostBySlug(slug!);
-
       if (response.success) {
         const fetchedPost = response.data.post;
-
-        // Check if current user is the author
         if (user && fetchedPost.author !== user.id) {
           setError("You are not authorized to edit this post");
           return;
         }
-
         setPost(fetchedPost);
         setFormData({
           title: fetchedPost.title,
@@ -63,15 +61,12 @@ const EditPost: React.FC = () => {
       const errorMessage =
         error.response?.data?.message || "Failed to load post";
       setError(errorMessage);
-      console.error("Fetch post error:", err);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
@@ -84,7 +79,7 @@ const EditPost: React.FC = () => {
       .split(",")
       .map((tag) => tag.trim().toLowerCase())
       .filter((tag) => tag.length > 0)
-      .slice(0, 10); // Limit to 10 tags
+      .slice(0, 10);
   };
 
   const validateForm = (): boolean => {
@@ -92,44 +87,34 @@ const EditPost: React.FC = () => {
       showError("Please enter a title");
       return false;
     }
-
     if (formData.title.trim().length < 5) {
       showError("Title must be at least 5 characters long");
       return false;
     }
-
     if (!formData.content.trim()) {
       showError("Please enter content");
       return false;
     }
-
     if (formData.content.trim().length < 50) {
       showError("Content must be at least 50 characters long");
       return false;
     }
-
     return true;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     if (!validateForm() || !post) return;
-
     setIsSubmitting(true);
-
     try {
       const updateData = {
         title: formData.title.trim(),
         content: formData.content.trim(),
         tags: processTags(formData.tags),
       };
-
       const response = await postService.updatePost(post._id, updateData);
-
       if (response.success) {
         showSuccess("Post updated successfully!");
-        // Navigate to the updated post
         navigate(`/posts/${response.data.post.slug}`);
       }
     } catch (error: unknown) {
@@ -137,7 +122,6 @@ const EditPost: React.FC = () => {
       const errorMessage =
         err.response?.data?.message || "Failed to update post";
       showError(errorMessage);
-      console.error("Update post error:", error);
     } finally {
       setIsSubmitting(false);
     }
@@ -154,10 +138,9 @@ const EditPost: React.FC = () => {
   const wordCount = formData.content
     .trim()
     .split(/\s+/)
-    .filter((word) => word.length > 0).length;
+    .filter((w) => w.length > 0).length;
   const readTime = Math.max(1, Math.ceil(wordCount / 200)); // 200 words per minute
 
-  // Check if form has changes
   const hasChanges =
     post &&
     (formData.title !== post.title ||
@@ -177,7 +160,6 @@ const EditPost: React.FC = () => {
       </div>
     );
   }
-
   if (error) {
     return (
       <div className="min-h-screen bg-gray-50">
@@ -199,11 +181,9 @@ const EditPost: React.FC = () => {
       </div>
     );
   }
-
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
-
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">
@@ -215,7 +195,6 @@ const EditPost: React.FC = () => {
               <ArrowLeftIcon className="h-4 w-4" />
               <span>Back</span>
             </button>
-
             {hasChanges && (
               <div className="flex items-center space-x-2 text-amber-600 bg-amber-50 px-3 py-1 rounded-full text-sm">
                 <ExclamationTriangleIcon className="h-4 w-4" />
@@ -224,7 +203,6 @@ const EditPost: React.FC = () => {
             )}
           </div>
         </div>
-
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
           <div className="mb-8">
             <div className="flex items-center space-x-2 mb-2">
@@ -235,7 +213,6 @@ const EditPost: React.FC = () => {
               Make changes to your post and save them when you're ready.
             </p>
           </div>
-
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Title */}
             <div>
@@ -257,7 +234,6 @@ const EditPost: React.FC = () => {
                 <span>{formData.title.length}/200</span>
               </div>
             </div>
-
             {/* Tags */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -273,7 +249,7 @@ const EditPost: React.FC = () => {
                 placeholder="react, javascript, web-development, typescript (comma separated)"
               />
               <div className="mt-1 text-xs text-gray-500">
-                Add up to 10 relevant tags to help others find your post
+                Add up to 10 relevant tags
               </div>
               {formData.tags && (
                 <div className="mt-2 flex flex-wrap gap-2">
@@ -288,8 +264,7 @@ const EditPost: React.FC = () => {
                 </div>
               )}
             </div>
-
-            {/* Content */}
+            {/* Markdown Editor */}
             <div>
               <div className="flex justify-between items-center mb-2">
                 <label className="block text-sm font-medium text-gray-700">
@@ -299,35 +274,21 @@ const EditPost: React.FC = () => {
                   {wordCount} words • ~{readTime} min read
                 </div>
               </div>
-              <textarea
-                name="content"
+              <MdEditor
                 value={formData.content}
-                onChange={handleInputChange}
-                disabled={isSubmitting}
-                rows={16}
-                maxLength={50000}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none disabled:bg-gray-100 disabled:cursor-not-allowed font-mono text-sm leading-relaxed"
-                placeholder="Edit your post content..."
+                style={{ height: "400px" }}
+                renderHTML={(text) => <ReactMarkdown>{text}</ReactMarkdown>}
+                onChange={({ text }) =>
+                  setFormData((prev) => ({ ...prev, content: text }))
+                }
+                readOnly={isSubmitting}
+                placeholder="Edit your post content using markdown..."
               />
               <div className="mt-1 flex justify-between text-xs text-gray-500">
                 <span>Minimum 50 characters required</span>
                 <span>{formData.content.length}/50,000</span>
               </div>
             </div>
-
-            {/* Preview Section */}
-            {formData.content && (
-              <div className="border border-gray-200 rounded-lg p-4 bg-gray-50">
-                <h4 className="text-sm font-medium text-gray-700 mb-2">
-                  Content Preview:
-                </h4>
-                <div className="text-sm text-gray-600 line-clamp-3">
-                  {formData.content.substring(0, 200)}
-                  {formData.content.length > 200 && "..."}
-                </div>
-              </div>
-            )}
-
             {/* Action Buttons */}
             <div className="flex flex-col sm:flex-row gap-4 pt-6 border-t border-gray-200">
               <button
@@ -338,7 +299,6 @@ const EditPost: React.FC = () => {
               >
                 <span>Cancel</span>
               </button>
-
               <button
                 type="submit"
                 disabled={
@@ -362,26 +322,6 @@ const EditPost: React.FC = () => {
                 )}
               </button>
             </div>
-
-            {/* Changes Indicator */}
-            {hasChanges && (
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <h4 className="text-sm font-semibold text-blue-900 mb-2">
-                  📝 Changes Detected:
-                </h4>
-                <ul className="text-xs text-blue-800 space-y-1">
-                  {formData.title !== post?.title && (
-                    <li>• Title has been modified</li>
-                  )}
-                  {formData.content !== post?.content && (
-                    <li>• Content has been updated</li>
-                  )}
-                  {formData.tags !== post?.tags.join(", ") && (
-                    <li>• Tags have been changed</li>
-                  )}
-                </ul>
-              </div>
-            )}
           </form>
         </div>
       </div>

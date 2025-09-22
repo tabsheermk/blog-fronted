@@ -25,6 +25,7 @@ import {
   HandThumbUpIcon as HandThumbUpSolidIcon,
   HandThumbDownIcon as HandThumbDownSolidIcon,
 } from "@heroicons/react/24/solid";
+import ReactMarkdown from "react-markdown";
 
 const PostDetail: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -157,14 +158,6 @@ const PostDetail: React.FC = () => {
       month: "long",
       day: "numeric",
     });
-  };
-
-  const formatContent = (content: string) => {
-    return content.split("\n").map((line, index) => (
-      <p key={index} className="mb-4 last:mb-0 text-left">
-        {line}
-      </p>
-    ));
   };
 
   // Check if current user is the post author
@@ -379,7 +372,7 @@ const PostDetail: React.FC = () => {
           {/* Post Body - Updated styling to not center content */}
           <div className="p-8">
             <div className="text-gray-800 text-base leading-relaxed space-y-4">
-              {formatContent(post.content)}
+              <ReactMarkdown>{post.content}</ReactMarkdown>
             </div>
           </div>
         </article>
