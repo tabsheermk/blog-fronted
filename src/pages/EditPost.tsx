@@ -170,9 +170,9 @@ const EditPost: React.FC = () => {
   }
 
   return (
-    <main className="flex-grow max-w-3xl mx-auto w-full px-0 sm:px-6 lg:px-8 py-8">
+    <div className="min-h-screen bg-gray-50 flex flex-col">
       <Navbar />
-      <main className="flex-grow max-w-3xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8">
+      <main className="flex-grow max-w-3xl mx-auto w-full px-0 sm:px-6 lg:px-8 py-8">
         <div className="mb-6 flex flex-col sm:flex-row items-center justify-between gap-4">
           <button
             onClick={() => navigate(-1)}
