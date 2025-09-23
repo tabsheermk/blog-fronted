@@ -170,7 +170,7 @@ const EditPost: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <main className="flex-grow max-w-3xl mx-auto w-full px-0 sm:px-6 lg:px-8 py-8">
       <Navbar />
       <main className="flex-grow max-w-3xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-6 flex flex-col sm:flex-row items-center justify-between gap-4">

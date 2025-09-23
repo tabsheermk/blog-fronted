@@ -92,7 +92,7 @@ const Write: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+      <main className="max-w-4xl mx-auto p-0 sm:px-6 lg:px-8 py-10">
         <section className="bg-white rounded-lg border border-gray-200 shadow p-6">
           <header className="mb-6 text-center sm:text-left">
             <h1 className="text-3xl sm:text-4xl font-bold mb-1">

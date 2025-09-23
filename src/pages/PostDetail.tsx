@@ -182,7 +182,7 @@ const PostDetail: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <main className="max-w-full sm:max-w-4xl mx-auto p-0 sm:px-6 lg:px-8 py-6">
         {/* Back Button */}
         <div className="mb-6 flex justify-start">
           <button
