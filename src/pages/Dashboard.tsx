@@ -149,7 +149,7 @@ const Dashboard: React.FC = () => {
                 </div>
               )}
             </div>
-            <div className="flex items-center gap-2 mt-[3]">
+            <div className="flex items-center gap-2 mt-[3] flex-wrap">
               <span className="text-sm text-gray-700 whitespace-nowrap">
                 Sort by:
               </span>

@@ -209,7 +209,7 @@ const PostDetail: React.FC = () => {
                     <UserIcon className="w-5 h-5 mr-1" />
                     {post.authorDetails.firstName} {post.authorDetails.lastName}
                   </div>
-                  <div className="flex gap-x-6 text-gray-500 text-xs mt-1 sm:mt-0">
+                  <div className="flex gap-x-2 text-gray-500 text-xs mt-1 sm:mt-0 sm:gap-x-6">
                     <time className="flex items-center gap-1 whitespace-nowrap">
                       <CalendarIcon className="w-4 h-4" />{" "}
                       {formatDate(post.createdAt)}
