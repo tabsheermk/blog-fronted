@@ -89,7 +89,6 @@ const Dashboard: React.FC = () => {
       <Navbar />
 
       <main className="max-w-full sm:max-w-7xl mx-auto p-0 sm:px-6 lg:px-8 py-10">
-
         {/* Header with welcome and toggle buttons */}
         <div className="mb-8 flex flex-col md:flex-row md:items-end md:justify-between gap-4">
           <div className="text-center md:text-left flex-1">
@@ -150,7 +149,7 @@ const Dashboard: React.FC = () => {
                 </div>
               )}
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 mt-[3]">
               <span className="text-sm text-gray-700 whitespace-nowrap">
                 Sort by:
               </span>
