@@ -88,12 +88,12 @@ const PostDetail: React.FC = () => {
                   score: number;
                 },
               }
-            : p
+            : p,
         );
         setUserVote(
           ["upvote", "downvote"].includes(res.data.userVote as string)
             ? (res.data.userVote as "upvote" | "downvote")
-            : null
+            : null,
         );
       }
     } catch {
@@ -290,6 +290,7 @@ const PostDetail: React.FC = () => {
           {/* Voting and Share */}
           <div className="px-6 sm:px-8 py-6 border-t border-gray-200 flex flex-wrap gap-4 space-x-4 items-center">
             <button
+              data-testid="like-post"
               onClick={() => handleVote("upvote")}
               disabled={isVoting || !isAuthenticated || !!isAuthor}
               className={`flex items-center gap-1 border px-4 py-2 rounded-lg text-sm transition ${

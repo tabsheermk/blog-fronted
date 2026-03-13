@@ -101,6 +101,7 @@ const Register: React.FC = () => {
               Email Address
             </label>
             <input
+              data-testid="signup-email"
               type="email"
               name="email"
               value={formData.email}
@@ -119,6 +120,7 @@ const Register: React.FC = () => {
             </label>
             <div className="relative">
               <input
+                data-testid="signup-pass"
                 type={showPassword ? "text" : "password"}
                 name="password"
                 value={formData.password}
@@ -150,6 +152,7 @@ const Register: React.FC = () => {
             </label>
             <div className="relative">
               <input
+                data-testid="signup-confirm"
                 type={showConfirmPassword ? "text" : "password"}
                 name="confirmPassword"
                 value={formData.confirmPassword}
